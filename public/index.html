@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CRUD API Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 900px;
+      background: rgba(248, 151, 151, 0.612);
+      padding: 40px;
+      
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h2 { 
+  margin-top: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #112d01;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      
+      align-items: center;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .product {
+      background: #eee;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+
+    hr {
+  border: 1px dashed rgb(117, 62, 113);
+}
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1> Product API Tester</h1>
+
+   <h2>Add Product</h2>
+<input type="text" id="name" placeholder="Product name">
+<input type="number" id="quantity" placeholder="Quantity">
+<input type="number" id="price" placeholder="Price">
+<button onclick="addProduct()">Add Product</button>
+
+<hr />
+
+<h2>Update Product</h2>
+<input type="text" id="updateId" placeholder="Product ID">
+<input type="text" id="updateName" placeholder="New name">
+<input type="number" id="updateQuantity" placeholder="New quantity">
+<input type="number" id="updatePrice" placeholder="New price">
+<button onclick="updateProduct()">Update Product</button>
+
+<hr />
+
+<h2>Delete Product</h2>
+<input type="text" id="deleteId" placeholder="Product ID">
+<button onclick="deleteProduct()">Delete Product</button>
+
+<hr />
+
+<h2>All Products</h2>
+<button onclick="getProducts()">Load Products</button>
+<div id="products"></div>
+  </div>
+
+<script>
+  const API_BASE = "/api/products";
+
+async function addProduct() {
+  try {
+    const name = document.getElementById("name").value;
+    const quantity = document.getElementById("quantity").value;
+    const price = document.getElementById("price").value;
+
+    const res = await fetch(API_BASE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, quantity, price })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(" Error: " + data.message);
+      return;
+    }
+
+    alert(" Product Added!");
+    getProducts();
+  } catch (err) {
+    alert(" Network error");
+    console.error(err);
+  }
+}
+
+  async function getProducts() {
+    const res = await fetch(API_BASE);
+    const data = await res.json();
+
+    const container = document.getElementById("products");
+    container.innerHTML = "";
+
+    data.forEach(product => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        <b>${product.name}</b><br>
+        <small><b>ID:</b> ${product._id}</small><br>
+        Quantity: ${product.quantity}<br>
+        Price: ₹${product.price}
+      `;
+      container.appendChild(div);
+    });
+  }
+
+
+
+  async function updateProduct() {
+  const id = document.getElementById("updateId").value;
+  const name = document.getElementById("updateName").value;
+  const quantity = document.getElementById("updateQuantity").value;
+  const price = document.getElementById("updatePrice").value;
+
+  const res = await fetch(`${API_BASE}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name, quantity, price })
+  });
+
+  if (res.ok) {
+    alert(" Product updated!");
+    getProducts();
+  } else {
+    alert(" Update failed");
+  }
+}
+
+async function deleteProduct() {
+  const id = document.getElementById("deleteId").value;
+
+  const res = await fetch(`${API_BASE}/${id}`, {
+    method: "DELETE"
+  });
+
+  if (res.ok) {
+    alert(" Product deleted!");
+    getProducts();
+  } else {
+    alert(" Delete failed");
+  }
+}
+
+</script>
+
+</body>
+</html>
